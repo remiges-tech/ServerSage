@@ -13,7 +13,7 @@ func main() {
 	p := metrics.NewPrometheusMetrics()
 
 	// Register a new counter for counting iterations
-	p.Register("iterationCount", "Counter", "Number of iterations")
+	p.Register("iterationCount", metrics.MetricCounter(), "Number of iterations")
 
 	// Start the metrics server in a separate goroutine
 	go p.StartMetricsServer("8080")

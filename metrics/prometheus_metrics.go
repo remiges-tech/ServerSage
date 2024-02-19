@@ -10,6 +10,33 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// MetricType defines a custom type for different kinds of metrics.
+type MetricType struct {
+	name string
+}
+
+// String implements stringer for MetricType.
+func (m MetricType) String() string {
+	return m.name
+}
+
+// Predefined MetricType instances for each metric type.
+var (
+	metricCounter   = MetricType{"Counter"}
+	metricGauge     = MetricType{"Gauge"}
+	metricHistogram = MetricType{"Histogram"}
+)
+
+// MetricCounter returns an instance of MetricType representing a Counter metric.
+// This function encapsulates the creation of a Counter metric type.
+func MetricCounter() MetricType { return metricCounter }
+
+// MetricGauge returns an instance of MetricType representing a Gauge metric.
+func MetricGauge() MetricType { return metricGauge }
+
+// MetricHistogram returns an instance of MetricType representing a Histogram metric.
+func MetricHistogram() MetricType { return metricHistogram }
+
 // PrometheusMetrics is a structure that implements the Metrics interface using Prometheus as the backend.
 // It stores mappings for different Prometheus metric types (Counter, Gauge, Histogram) and their vector counterparts.
 type PrometheusMetrics struct {
@@ -71,9 +98,9 @@ func (p *PrometheusMetrics) SetCustomBuckets(name string, buckets []float64) {
 // Supported metric types include 'Counter', 'Gauge', and 'Histogram'.
 // The method takes the metric 'name', its 'metricType', and a 'help' string describing the metric.
 // For 'Histogram' types, it uses custom buckets if they have been set; otherwise, it falls back to default buckets.
-func (p *PrometheusMetrics) Register(name, metricType, help string) {
+func (p *PrometheusMetrics) Register(name string, metricType MetricType, help string) {
 	switch metricType {
-	case "Counter":
+	case metricCounter:
 		// Creating a new Counter metric
 		counter := prometheus.NewCounter(prometheus.CounterOpts{
 			Name: name,
@@ -84,7 +111,7 @@ func (p *PrometheusMetrics) Register(name, metricType, help string) {
 		// Storing the reference in the counters map
 		p.counters[name] = counter
 
-	case "Gauge":
+	case metricGauge:
 		// Creating a new Gauge metric
 		gauge := prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: name,
@@ -95,7 +122,7 @@ func (p *PrometheusMetrics) Register(name, metricType, help string) {
 		// Storing the reference in the gauges map
 		p.gauges[name] = gauge
 
-	case "Histogram":
+	case metricHistogram:
 		buckets, ok := p.customBuckets[name]
 		if !ok {
 			buckets = prometheus.DefBuckets // Use default buckets if not specified
@@ -139,10 +166,10 @@ func (p *PrometheusMetrics) Record(name string, value float64) {
 // This method is similar to 'Register' but for metrics with labels (like CounterVec, GaugeVec, HistogramVec).
 // It takes the metric 'name', 'metricType', a 'help' description, and a slice of 'labels' (the label keys).
 // For 'HistogramVec', it respects custom buckets if set for the given metric name.
-func (p *PrometheusMetrics) RegisterWithLabels(name, metricType, help string, labels []string) {
+func (p *PrometheusMetrics) RegisterWithLabels(name string, metricType MetricType, help string, labels []string) {
 	// Creating a new Counter metric with labels
 	switch metricType {
-	case "Counter":
+	case metricCounter:
 		counterVec := prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: name,
 			Help: help,
@@ -151,7 +178,7 @@ func (p *PrometheusMetrics) RegisterWithLabels(name, metricType, help string, la
 		prometheus.MustRegister(counterVec)
 		// Storing the reference in the counters map
 		p.counterVecs[name] = counterVec
-	case "Gauge":
+	case metricGauge:
 		// Creating a new Gauge metric with labels
 		gaugeVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: name,
@@ -161,7 +188,7 @@ func (p *PrometheusMetrics) RegisterWithLabels(name, metricType, help string, la
 		prometheus.MustRegister(gaugeVec)
 		// Storing the reference in the gaugeVecs map
 		p.gaugeVecs[name] = gaugeVec
-	case "Histogram":
+	case metricHistogram:
 		// Creating a new Histogram metric with labels
 		buckets, ok := p.customBuckets[name]
 		if !ok {
