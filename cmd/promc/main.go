@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/format"
 	"os"
@@ -9,9 +10,9 @@ import (
 	"text/template"
 
 	"github.com/spf13/cobra"
+	"github.com/xeipuuv/gojsonschema"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"gopkg.in/yaml.v2"
 )
 
 // MetricConfig represents the YAML configuration file structure.
@@ -160,8 +161,8 @@ func main() {
 
 	var rootCmd = &cobra.Command{
 		Use:   "generate",
-		Short: "Generates Prometheus metrics based on a YAML configuration",
-		Long: `A tool to generate Prometheus metrics Go code from a YAML configuration file.
+		Short: "Generates Prometheus metrics based on a JSON configuration",
+		Long: `A tool to generate Prometheus metrics Go code from a JSON configuration file.
 Complete documentation is available at http://example.com`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Load and parse the YAML configuration file.
@@ -171,8 +172,15 @@ Complete documentation is available at http://example.com`,
 				os.Exit(1)
 			}
 
+			// Validate the JSON config
+			err = validateConfig(content)
+			if err != nil {
+				fmt.Printf("config validation failed: %v\n", err)
+				os.Exit(1)
+			}
+
 			var config MetricConfig
-			err = yaml.Unmarshal(content, &config)
+			err = json.Unmarshal(content, &config)
 			if err != nil {
 				fmt.Printf("error parsing config file: %v\n", err)
 				os.Exit(1)
@@ -238,4 +246,32 @@ Complete documentation is available at http://example.com`,
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func validateConfig(content []byte) error {
+	// Load the JSON schema
+	schemaLoader := gojsonschema.NewStringLoader(metricConfigSchema)
+	schema, err := gojsonschema.NewSchema(schemaLoader)
+	if err != nil {
+		return fmt.Errorf("error parsing schema: %v", err)
+	}
+
+	// Load the JSON config
+	documentLoader := gojsonschema.NewBytesLoader(content)
+
+	// Validate the JSON config against the schema
+	result, err := schema.Validate(documentLoader)
+	if err != nil {
+		return fmt.Errorf("error validating config: %v", err)
+	}
+
+	if !result.Valid() {
+		var errMessages []string
+		for _, err := range result.Errors() {
+			errMessages = append(errMessages, fmt.Sprintf("- %s", err))
+		}
+		return fmt.Errorf("invalid config:\n%s", strings.Join(errMessages, "\n"))
+	}
+
+	return nil
 }
