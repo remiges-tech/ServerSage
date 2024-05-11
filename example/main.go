@@ -24,7 +24,7 @@ func main() {
 	// Existing handler adapted for Gin
 	r.GET("/", func(c *gin.Context) {
 		// Increment the http_requests_total metric using the generated wrapper function.
-		metrics.IncHttpRequestsTotal(metrics.Method(c.Request.Method), metrics.Status(http.StatusText(http.StatusOK)))
+		metrics.RecordHttpRequestsTotal(metrics.Method(c.Request.Method), metrics.Status(http.StatusText(http.StatusOK)))
 
 		// wait for random time between 1 us to 10 seconds
 		time.Sleep(time.Duration(rand.Intn(10_000_000)) * time.Microsecond)
@@ -54,7 +54,7 @@ func requestDurationMiddleware() gin.HandlerFunc {
 		log.Printf("Observed request duration: %f seconds\n", duration)
 
 		// Observe request duration
-		metrics.ObserveHttpRequestDurationSeconds(metrics.Method(c.Request.Method),
+		metrics.RecordHttpRequestDurationSeconds(metrics.Method(c.Request.Method),
 			metrics.Status(http.StatusText(c.Writer.Status())),
 			duration)
 	}
@@ -64,7 +64,7 @@ func updateSystemUptime() {
 	startTime := time.Now()
 	for {
 		uptime := time.Since(startTime).Seconds()
-		metrics.SetSystemUptimeSeconds(uptime)
+		metrics.RecordSystemUptimeSeconds(uptime)
 		time.Sleep(5 * time.Second)
 	}
 }

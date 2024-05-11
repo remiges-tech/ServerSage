@@ -28,7 +28,7 @@ func init() {
             []string{ {{- range .Labels}}"{{.}}",{{- end}} },
         )
 
-        func Inc{{snakeToCamel .Name}}({{range .Labels}}{{snakeToCamel .}} {{snakeToCamel .}},{{- end}}) {
+        func Record{{snakeToCamel .Name}}({{range .Labels}}{{snakeToCamel .}} {{snakeToCamel .}},{{- end}}) {
             {{snakeToCamel .Name}}.With(prometheus.Labels{
                 {{- range .Labels}}
                 "{{.}}": string({{snakeToCamel .}}),
@@ -45,7 +45,7 @@ func init() {
             []string{ {{- range .Labels}}"{{.}}",{{- end}} },
         )
 
-        func Set{{snakeToCamel .Name}}({{range .Labels}}{{snakeToCamel .}} {{snakeToCamel .}},{{- end}} value float64) {
+        func Record{{snakeToCamel .Name}}({{range .Labels}}{{snakeToCamel .}} {{snakeToCamel .}},{{- end}} value float64) {
             {{snakeToCamel .Name}}.With(prometheus.Labels{
                 {{- range .Labels}}
                 "{{.}}": string({{snakeToCamel .}}),
@@ -63,7 +63,7 @@ func init() {
             []string{ {{- range .Labels}}"{{.}}",{{- end}} },
         )
 
-        func Observe{{snakeToCamel .Name}}({{range .Labels}}{{snakeToCamel .}} {{snakeToCamel .}},{{- end}} value float64) {
+        func Record{{snakeToCamel .Name}}({{range .Labels}}{{snakeToCamel .}} {{snakeToCamel .}},{{- end}} value float64) {
             {{snakeToCamel .Name}}.With(prometheus.Labels{
                 {{- range .Labels}}
                 "{{.}}": string({{snakeToCamel .}}),

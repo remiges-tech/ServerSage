@@ -26,7 +26,7 @@ var SystemUptimeSeconds = prometheus.NewGaugeVec(
 	[]string{},
 )
 
-func SetSystemUptimeSeconds(value float64) {
+func RecordSystemUptimeSeconds(value float64) {
 	SystemUptimeSeconds.With(prometheus.Labels{}).Set(value)
 }
 
@@ -38,7 +38,7 @@ var HttpRequestsTotal = prometheus.NewCounterVec(
 	[]string{"method", "status"},
 )
 
-func IncHttpRequestsTotal(Method Method, Status Status) {
+func RecordHttpRequestsTotal(Method Method, Status Status) {
 	HttpRequestsTotal.With(prometheus.Labels{
 		"method": string(Method),
 		"status": string(Status),
@@ -54,7 +54,7 @@ var HttpRequestDurationSeconds = prometheus.NewHistogramVec(
 	[]string{"method", "status"},
 )
 
-func ObserveHttpRequestDurationSeconds(Method Method, Status Status, value float64) {
+func RecordHttpRequestDurationSeconds(Method Method, Status Status, value float64) {
 	HttpRequestDurationSeconds.With(prometheus.Labels{
 		"method": string(Method),
 		"status": string(Status),
@@ -69,7 +69,7 @@ var ActiveSessions = prometheus.NewGaugeVec(
 	[]string{"user_type"},
 )
 
-func SetActiveSessions(UserType UserType, value float64) {
+func RecordActiveSessions(UserType UserType, value float64) {
 	ActiveSessions.With(prometheus.Labels{
 		"user_type": string(UserType),
 	}).Set(value)
