@@ -14,20 +14,20 @@ func init() {
 	prometheus.MustRegister(ActiveSessions)
 }
 
-var SystemUptimeSeconds = prometheus.NewGauge(
+type Method string
+type Status string
+type UserType string
+
+var SystemUptimeSeconds = prometheus.NewGaugeVec(
 	prometheus.GaugeOpts{
 		Name: "system_uptime_seconds",
 		Help: "The total system uptime in seconds.",
 	},
+	[]string{},
 )
 
 func SetSystemUptimeSeconds(value float64) {
-	SystemUptimeSeconds.Set(value)
-}
-
-type HttpRequestsTotalLabels struct {
-	Method string
-	Status string
+	SystemUptimeSeconds.With(prometheus.Labels{}).Set(value)
 }
 
 var HttpRequestsTotal = prometheus.NewCounterVec(
@@ -38,16 +38,11 @@ var HttpRequestsTotal = prometheus.NewCounterVec(
 	[]string{"method", "status"},
 )
 
-func IncHttpRequestsTotal(labels HttpRequestsTotalLabels) {
+func IncHttpRequestsTotal(Method Method, Status Status) {
 	HttpRequestsTotal.With(prometheus.Labels{
-		"method": labels.Method,
-		"status": labels.Status,
+		"method": string(Method),
+		"status": string(Status),
 	}).Inc()
-}
-
-type HttpRequestDurationSecondsLabels struct {
-	Method string
-	Status string
 }
 
 var HttpRequestDurationSeconds = prometheus.NewHistogramVec(
@@ -59,15 +54,11 @@ var HttpRequestDurationSeconds = prometheus.NewHistogramVec(
 	[]string{"method", "status"},
 )
 
-func ObserveHttpRequestDurationSeconds(labels HttpRequestDurationSecondsLabels, value float64) {
+func ObserveHttpRequestDurationSeconds(Method Method, Status Status, value float64) {
 	HttpRequestDurationSeconds.With(prometheus.Labels{
-		"method": labels.Method,
-		"status": labels.Status,
+		"method": string(Method),
+		"status": string(Status),
 	}).Observe(value)
-}
-
-type ActiveSessionsLabels struct {
-	UserType string
 }
 
 var ActiveSessions = prometheus.NewGaugeVec(
@@ -78,8 +69,8 @@ var ActiveSessions = prometheus.NewGaugeVec(
 	[]string{"user_type"},
 )
 
-func SetActiveSessions(labels ActiveSessionsLabels, value float64) {
+func SetActiveSessions(UserType UserType, value float64) {
 	ActiveSessions.With(prometheus.Labels{
-		"user_type": labels.UserType,
+		"user_type": string(UserType),
 	}).Set(value)
 }
