@@ -1,3 +1,5 @@
+//go:generate go run versiongen/gen-version.go
+
 package main
 
 import (
@@ -133,6 +135,15 @@ Complete documentation is available at http://example.com`,
 	rootCmd.MarkFlagRequired("config")
 	rootCmd.MarkFlagRequired("output")
 	rootCmd.MarkFlagRequired("package")
+
+	var versionCmd = &cobra.Command{
+		Use:   "version",
+		Short: "Print the version information",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("Version: %s\nCommit: %s\n", version, commit)
+		},
+	}
+	rootCmd.AddCommand(versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
