@@ -2,6 +2,6 @@
 package main
 
 var (
-	version = "v0.3.0"
-	commit  = "5498d141b891d8e63c589d564a3f119401709bf4"
+	version = "v0.4.0"
+	commit  = "fb670937858383e7253af8b7f421da7484ad5b06"
 )
