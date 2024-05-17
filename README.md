@@ -6,7 +6,7 @@
 
 ### Installation
 
-`go install github.com/serversage/cmd/promc`
+`go install github.com/remiges-tech/serversage/cmd/promc`
 
 ### Usage
 
